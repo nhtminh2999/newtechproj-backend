@@ -15,7 +15,6 @@ const userSchema = new Schema({
     },
     User_Password: {
         type: String,
-        required: true,
     },
     User_Tokens: [{
         token: {
@@ -43,7 +42,7 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.generateAuthToken = async function () {
     //// Generate an auth token for the user
     const user = this;
-    const token = jwt.sign({ _id: user._id }, 'toihocmern');
+    const token = jwt.sign({ _id: user._id }, 'toihocmern', { expiresIn: '24h' });
     user.User_Tokens = user.User_Tokens.concat({ token });
     await user.save();
     return token;

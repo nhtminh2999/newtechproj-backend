@@ -11,7 +11,6 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
-
 app.use(cookieSession({
     name: 'newtechproj-session',
     keys: ['key1', 'key2']
@@ -22,6 +21,7 @@ app.use(passport.session());
 
 //MongoDb connection
 const uri = 'mongodb://localhost:27017/db_newtechproject';
+mongoose.Promise = global.Promise;
 mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true });
 const connection = mongoose.connection;
 connection.once('open', () => {
