@@ -42,9 +42,7 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.generateAuthToken = async function () {
     //// Generate an auth token for the user
     const user = this;
-    const token = jwt.sign({ _id: user._id }, 'toihocmern', { expiresIn: '24h' });
-    user.User_Tokens = user.User_Tokens.concat({ token });
-    await user.save();
+    const token = jwt.sign({ _id: user._id }, 'toihocmern', { expiresIn: '8h' });
     return token;
 }
 
@@ -53,7 +51,7 @@ userSchema.methods.comparePassword = function (password) {
     return bcrypt.compareSync(password, user.User_Password);
 };
 
-const User = mongoose.model('Users', userSchema, 'Users');
+const User = mongoose.model('User', userSchema, 'User');
 
 module.exports = User;
 

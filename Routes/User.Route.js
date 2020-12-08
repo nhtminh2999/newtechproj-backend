@@ -13,9 +13,9 @@ router.post('/create', async (req, res) => {
         const user = new User(req.body);
         await user.save();
         const token = await user.generateAuthToken();
-        res.status(201).send({ user, token });
+        return res.json({ user, token })
     } catch (error) {
-        res.status(400).send(error);
+        return res.status(400).send(error);
     }
 });
 
@@ -32,10 +32,10 @@ router.post('/login', async (req, res) => {
             throw new Error({ error: 'Invalid login credentials' })
         } else {
             const token = await user.generateAuthToken()
-            res.status(201).send({ user, token })
+            return res.json({ user, token })
         }
     } catch (error) {
-        res.status(400).send(error)
+        return res.status(400).send(error)
     }
 });
 
@@ -45,11 +45,11 @@ const isLoggedIn = async (req, res, next) => {
     } else {
         res.sendStatus(401);
     }
-}
+};
 
 router.get('/failed', function (req, res) {
     res.json({ message: 'You failed to login !' });
-})
+});
 
 router.get('/good', isLoggedIn, async function (req, res) {
     const getUser = await User.findOne({ User_Name: req.user.email });
@@ -80,7 +80,7 @@ router.get('/good', isLoggedIn, async function (req, res) {
                 { expires: new Date(Date.now() + 8 * 3600000), httpOnly: false })
             .redirect(`http://localhost:3000`)
     }
-})
+});
 
 router.get('/google',
     passport.authenticate('google', {
@@ -100,12 +100,38 @@ router.get('/logout', function (req, res) {
     req.session = null;
     req.logOut();
     res.redirect('/');
-})
+});
 
 router.get('/me', auth, async (req, res) => {
     // View logged in user profile
     res.send(req.user);
-})
+});
+
+router.post('/getDataFilter', async (req, res) => {
+    const searchModel = req.body;
+    let query1 = {};
+    let query2 = {};
+    let queryStatus = {};
+    if (!!searchModel.Status) {
+        queryStatus.Status = searchModel.Status;
+    }
+    if (!!searchModel.Value) {
+        query1.User_Fullname = { $regex: searchModel.Value, $options: 'i' };
+        query2.User_Name = { $regex: searchModel.Value, $options: 'i' };
+    }
+    const options = {
+        select: 'id User_Name User_Fullname',
+        sort: '1',
+        limit: 10,
+    }
+    User.find({ $and: [queryStatus, { $or: [query1, query2] }] }, null, options, function (err, result) {
+        if (err) {
+            return res.json({ message: 'Failed', result: err })
+        } else {
+            return res.json({ message: 'Success', result })
+        }
+    });
+});
 
 module.exports = router;
 
