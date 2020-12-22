@@ -29,9 +29,11 @@ connection.once('open', () => {
 });
 
 const userRouter = require('./Routes/User.Route');
-const customerRouter = require('./Routes/Customer.Route')
+const customerRouter = require('./Routes/Customer.Route');
+const contactHistoryRouter = require('./Routes/Contact_History_Route');
 app.use('/User', userRouter);
 app.use('/Customer', customerRouter);
+app.use('/Contact_History', contactHistoryRouter);
 
 //Run server
 app.listen(port, () => {
