@@ -51,14 +51,14 @@ const customerSchema = new Schema({
 customerSchema.virtual('CreatedByObject', {
     ref: 'User',
     localField: 'CreatedBy',
-    foreignField: 'User_Name',
+    foreignField: '_id',
     justOne: true
 });
 
 customerSchema.virtual('UpdatedByObject', {
     ref: 'User',
     localField: 'UpdatedBy',
-    foreignField: 'User_Name',
+    foreignField: '_id',
     justOne: true
 });
 

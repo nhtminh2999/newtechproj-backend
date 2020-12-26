@@ -10,18 +10,16 @@ const userSchema = new Schema({
     },
     User_Name: {
         type: String,
-        required: true,
-        unique: true,
+    },
+    User_GoogleId: {
+        type: String,
+    },
+    User_FacebookId: {
+        type: String,
     },
     User_Password: {
         type: String,
     },
-    User_Tokens: [{
-        token: {
-            type: String,
-            required: true,
-        }
-    }]
 })
 
 userSchema.pre('save', async function (next) {

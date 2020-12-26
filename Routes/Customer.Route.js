@@ -27,6 +27,12 @@ router.post('/search', async (req, res) => {
     if (!!searchModel.Customer_Phonenumber) {
         query.Customer_Phonenumber = { $regex: searchModel.Customer_Phonenumber, $options: 'i' };
     }
+    if (!!searchModel.Customer_Email) {
+        query.Customer_Email = { $regex: searchModel.Customer_Email, $options: 'i' };
+    }
+    if (!!searchModel.Customer_Address) {
+        query.Customer_Address = { $regex: searchModel.Customer_Address, $options: 'i' };
+    }
     if (!!searchModel.Status) {
         query.Status = searchModel.Status;
     }

@@ -38,9 +38,9 @@ const contactHistorySchema = new Schema({
 });
 
 contactHistorySchema.virtual('CustomerObject', {
-    ref: 'User',
-    localField: 'CreatedBy',
-    foreignField: 'User_Name',
+    ref: 'Customer',
+    localField: 'Contact_History_Customer',
+    foreignField: 'Customer_Code',
     justOne: true
 });
 

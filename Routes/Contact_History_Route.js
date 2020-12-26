@@ -18,8 +18,8 @@ router.post('/search', async (req, res) => {
             query.Contact_History_MettingDate = { $gte: startDate, $lte: endDate }
         }
     }
-    if (!!searchModel.Contact_History_Contact_History) {
-        query.Status = searchModel.Contact_History_Contact_History;
+    if (!!searchModel.Contact_History_Customer) {
+        query.Status = searchModel.Contact_History_Customer;
     }
     if (!!searchModel.Status) {
         query.Status = searchModel.Status;
@@ -48,12 +48,37 @@ router.post('/search', async (req, res) => {
     const options = {
         populate: [
             { path: 'CreatedByObject' },
-            { path: 'UpdatedByObject' }
+            { path: 'UpdatedByObject' },
+            { path: 'CustomerObject' }
         ],
         sort: { 'Contact_History_Code': 1 },
     }
 
     Contact_History.find({ $and: [query] }, null, options, function (err, result) {
+        if (err) {
+            return res.json({ message: 'Failed', result: err })
+        } else {
+            return res.json({ message: 'Success', result })
+        }
+    });
+});
+
+router.post('/getDataFilter', async (req, res) => {
+    const searchModel = req.body;
+    let query = {};
+    let queryStatus = {};
+    if (!!searchModel.Status) {
+        queryStatus.Status = searchModel.Status;
+    }
+    if (!!searchModel.Value) {
+        query.Contact_History_Code = { $regex: searchModel.Value, $options: 'i' };
+    }
+    const options = {
+        select: 'id Contact_History_Code',
+        sort: '1',
+        limit: 10,
+    }
+    Contact_History.find({ $and: [queryStatus, { $or: [query] }] }, null, options, function (err, result) {
         if (err) {
             return res.json({ message: 'Failed', result: err })
         } else {
@@ -101,7 +126,7 @@ router.post('/update', async (req, res) => {
     queryUpdate.Contact_History_Code = model.Contact_History_Code;
     const modelForUpdate = {
         Contact_History_Code: model.Contact_History_Code,
-        Contact_History_Contact_History: model.Contact_History_Contact_History,
+        Contact_History_Customer: model.Contact_History_Customer,
         Contact_History_MettingDate: model.Contact_History_MettingDate,
         Contact_History_Content: model.Contact_History_Content,
         Status: model.Status,

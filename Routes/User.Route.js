@@ -52,42 +52,25 @@ router.get('/failed', function (req, res) {
 });
 
 router.get('/good', isLoggedIn, async function (req, res) {
-    const getUser = await User.findOne({ User_Name: req.user.email });
-    if (!getUser) {
-        const user = new User();
-        user.User_Name = req.user.email;
-        user.User_Fullname = req.user.displayName;
-        await user.save();
-        const token = await user.generateAuthToken();
-        res
-            .cookie('access_token', 'Bearer ' + token,
-                {
-                    expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
-                })
-            .cookie('user_name', user.User_Name,
-                {
-                    expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
-                })
-            .redirect(`http://localhost:3000`)
-    } else {
-        const user = getUser;
-        const token = await user.generateAuthToken();
-        res
-            .cookie('access_token', 'Bearer ' + token,
-                { expires: new Date(Date.now() + 8 * 3600000), httpOnly: false },
-            )
-            .cookie('user_name', user.User_Name,
-                { expires: new Date(Date.now() + 8 * 3600000), httpOnly: false })
-            .redirect(`http://localhost:3000`)
-    }
+    const user = await User.findOne({ _id: req.user._id });
+    const token = await user.generateAuthToken();
+    return res
+        .cookie('access_token', 'Bearer ' + token,
+            {
+                expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
+            })
+        .cookie('user_id', user.id,
+            {
+                expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
+            })
+        .redirect(`http://localhost:3000`)
 });
 
 router.get('/google',
     passport.authenticate('google', {
-        scope:
-            ['email', 'profile']
-    }
-    ));
+        scope: ['email', 'profile']
+    })
+);
 
 router.get('/google/callback',
     passport.authenticate('google', { failureRedirect: '/User/failed' }),
@@ -95,6 +78,20 @@ router.get('/google/callback',
         res.redirect('/User/good');
     }
 );
+
+router.get('/facebook',
+    passport.authenticate('facebook', {
+
+    })
+)
+
+
+router.get('/facebook/callback',
+    passport.authenticate('facebook', { failureRedirect: '/User/failed' }),
+    function (req, res) {
+        res.redirect('/User/good');
+    }
+)
 
 router.get('/logout', function (req, res) {
     req.session = null;
@@ -117,10 +114,10 @@ router.post('/getDataFilter', async (req, res) => {
     }
     if (!!searchModel.Value) {
         query1.User_Fullname = { $regex: searchModel.Value, $options: 'i' };
-        query2.User_Name = { $regex: searchModel.Value, $options: 'i' };
+        query2._id = searchModel._id;
     }
     const options = {
-        select: 'id User_Name User_Fullname',
+        select: '_id User_Name User_Fullname',
         sort: '1',
         limit: 10,
     }
