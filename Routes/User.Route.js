@@ -21,21 +21,18 @@ router.post('/create', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     //Login a registered user
-    try {
-        const { User_Name, User_Password } = req.body;
-        const user = await User.findOne({ User_Name });
-        if (!user) {
-            throw new Error({ error: 'Invalid login credentials' })
-        }
-        const isPasswordMatch = await user.comparePassword(User_Password);
-        if (!isPasswordMatch) {
-            throw new Error({ error: 'Invalid login credentials' })
-        } else {
-            const token = await user.generateAuthToken()
-            return res.json({ user, token })
-        }
-    } catch (error) {
-        return res.status(400).send(error)
+
+    const { User_Name, User_Password } = req.body;
+    const user = await User.findOne({ User_Name });
+    if (!user) {
+        return res.json({ error: 'Invalid login credentials' });
+    }
+    const isPasswordMatch = await user.comparePassword(User_Password);
+    if (!isPasswordMatch) {
+        return res.json({ error: 'Invalid login credentials' });
+    } else {
+        const token = await user.generateAuthToken()
+        return res.json({ user, token })
     }
 });
 
@@ -96,7 +93,7 @@ router.get('/facebook/callback',
 router.get('/logout', function (req, res) {
     req.session = null;
     req.logOut();
-    res.redirect('/');
+    res.clearCookie('user_id').clearCookie('access_token').redirect(`http://localhost:3000`);
 });
 
 router.get('/me', auth, async (req, res) => {
