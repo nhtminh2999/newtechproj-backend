@@ -6,9 +6,9 @@ const auth = async (req, res, next) => {
     if (!bearerHeader) {
         res.json({ message: 'No token provided...' });
     } else {
-        const token = req.header('Authorization').replace('Bearer ', '');
-        const data = jwt.verify(token, 'toihocmern');
         try {
+            const token = req.header('Authorization').replace('Bearer ', '');
+            const data = jwt.verify(token, 'toihocmern');
             const user = await User.findOne({ _id: data._id });
             if (!user) {
                 throw new Error();
@@ -17,7 +17,8 @@ const auth = async (req, res, next) => {
             req.token = token;
             next();
         } catch (error) {
-            res.status(401).send({ error: 'Not authorized to access this resource' });
+            req.timeOut = error;
+            next();
         }
     }
 }

@@ -10,10 +10,14 @@ const router = express.Router();
 router.post('/create', async (req, res) => {
     //Create a new user
     try {
+        const isExisted = await User.findOne({ User_Name: req.body.User_Name });
+        if (isExisted) {
+            return res.json({ error: 'Failed' });
+        }
         const user = new User(req.body);
         await user.save();
         const token = await user.generateAuthToken();
-        return res.json({ user, token })
+        return res.json({ message: 'Success', user, token })
     } catch (error) {
         return res.status(400).send(error);
     }
@@ -57,6 +61,10 @@ router.get('/good', isLoggedIn, async function (req, res) {
                 expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
             })
         .cookie('user_id', user.id,
+            {
+                expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
+            })
+        .cookie('user_fullname', user.User_Fullname,
             {
                 expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
             })

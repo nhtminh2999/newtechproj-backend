@@ -4,8 +4,12 @@ const auth = require('../Middleware/auth');
 let Customer = require('../Models/Customer.Model');
 const router = express.Router();
 
-router.post('/search', async (req, res) => {
+router.post('/search', auth, async (req, res) => {
     const searchModel = req.body;
+    const authError = req.timeOut;
+    if (authError) {
+        return res.status(401).json({ error: 'Unauthorize' });
+    }
 
     let query = {};
     if (!!searchModel.Customer_Code) {
@@ -119,7 +123,12 @@ async function autoGenateCode() {
     }
 }
 
-router.post('/create', async (req, res) => {
+router.post('/create', auth, async (req, res) => {
+    const authError = req.timeOut;
+    if (authError) {
+        return res.status(401).json({ error: 'Unauthorize' });
+    }
+
     let model = req.body;
     model.Customer_Code = await autoGenateCode();
     const customer = new Customer(model);
@@ -143,7 +152,12 @@ router.post('/create', async (req, res) => {
     });
 });
 
-router.post('/update', async (req, res) => {
+router.post('/update', auth, async (req, res) => {
+    const authError = req.timeOut;
+    if (authError) {
+        return res.status(401).json({ error: 'Unauthorize' });
+    }
+
     let model = req.body;
     const isExistedEmail = await Customer.find({ Customer_Email: model.Customer_Email, Customer_Code: { $ne: model.Customer_Code } });
     if (!!isExistedEmail && isExistedEmail.length > 0) {
@@ -179,6 +193,11 @@ router.post('/update', async (req, res) => {
 });
 
 router.post('/deleteModels', (req, res) => {
+    const authError = req.timeOut;
+    if (authError) {
+        return res.status(401).json({ error: 'Unauthorize' });
+    }
+
     let listDelete = req.body;
     let query = {};
     query.Customer_Code = { $in: listDelete };
